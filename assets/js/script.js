@@ -15,7 +15,7 @@ var taskFormHandler = function(event) {
   var taskTypeInput = document.querySelector("select[name='task-type']").value;
 
   // check if inputs are empty (validate)
-  if (taskNameInput === "" || taskTypeInput === "") {
+  if (!taskNameInput === "" || !taskTypeInput === "") {
     alert("You need to fill out the task form!");
     return false;
   }
@@ -54,7 +54,24 @@ var createTaskEl = function(taskDataObj) {
   // create task actions (buttons and select) for task
   var taskActionsEl = createTaskActions(taskIdCounter);
   listItemEl.appendChild(taskActionsEl);
-  tasksToDoEl.appendChild(listItemEl);
+  switch (taskDataObj.status) {
+    case "to do":
+      taskActionsEl.querySelector("select[name='status-change']").selectedIndex = 0;
+      tasksToDoEl.append(listItemEl);
+      break;
+    case "in progress":
+      taskActionsEl.querySelector("select[name='status-change']").selectedIndex = 1;
+      tasksInProgressEl.append(listItemEl);
+      break;
+    case "completed":
+      taskActionsEl.querySelector("select[name='status-change']").selectedIndex = 2;
+      tasksCompletedEl.append(listItemEl);
+      break;
+    default:
+      console.log("Something went wrong!");
+  }
+
+
 
   taskDataObj.id = taskIdCounter;
   tasks.push(taskDataObj);
@@ -117,13 +134,15 @@ var completeEditTask = function(taskName, taskType, taskId) {
     tasks[i].name = taskName;
     task[i].type - taskType;
     }    
-  };
+  }
   alert("Task Updated!");
-saveTasks();
+
   // remove data attribute from form
   formEl.removeAttribute("data-task-id");
   // update formEl button to go back to saying "Add Task" instead of "Edit Task"
   formEl.querySelector("#save-task").textContent = "Add Task";
+  
+  saveTasks();
 };
 
 var taskButtonHandler = function(event) {
@@ -209,6 +228,16 @@ var deleteTask = function(taskId) {
 var saveTasks = function() {
   localStorage.setItem("tasks", JSON.stringify (tasks));
 }
+var loadTasks = function() {
+  var savedTasks = localStorage.getItem("tasks");
+  if (!savedTasks) {
+    return false;
+  }
+  savedTasks =JSON.parse(savedTasks);
+  for (i = 0; i < savedTasks.length; i++){
+    createTaskEl(savedTasks[i]);
+  }
+};
 // Create a new task
 formEl.addEventListener("submit", taskFormHandler);
 
